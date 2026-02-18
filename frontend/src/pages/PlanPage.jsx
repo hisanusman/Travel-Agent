@@ -30,6 +30,11 @@ function PlanPage() {
       if (response.success) {
         setPlan(response.plan);
         setTripId(response.trip_id);
+        
+        // Check if we have rich destination data for customization
+        const hasRichData = response.plan?.destination_data?.accommodations?.length > 0;
+        console.log('Has rich data:', hasRichData, response.plan?.destination_data);
+        
       } else {
         setError('Failed to create travel plan');
       }
@@ -163,10 +168,23 @@ function TravelPlanDisplay({ plan, tripId }) {
     }
   };
 
+  // Check if we have rich destination data for customization
+  const hasRichData = plan?.destination_data?.accommodations?.length > 0;
+
   return (
     <div className="plan-display">
       <div className="plan-header">
-        <h1>Your Travel Plan to {plan.destination}</h1>
+        <div className="header-content">
+          <h1>Your Travel Plan to {plan.destination}</h1>
+          {hasRichData && (
+            <button 
+              className="customize-btn"
+              onClick={() => navigate('/customize', { state: { plan } })}
+            >
+              🎨 Customize Your Trip
+            </button>
+          )}
+        </div>
         <p className="plan-summary">{plan.summary}</p>
       </div>
 

@@ -144,6 +144,15 @@ class OrchestratorAgent:
     ) -> Dict[str, Any]:
         """Consolidate all agent results into a unified travel plan"""
         
+        # Check if we have rich destination data (accommodations, activities, restaurants)
+        destination_data = {}
+        if destination.get('accommodations'):
+            destination_data = {
+                'accommodations': destination.get('accommodations', []),
+                'activities': destination.get('activities', []),
+                'restaurants': destination.get('restaurants', [])
+            }
+        
         return {
             'success': True,
             'plan': {
@@ -152,6 +161,7 @@ class OrchestratorAgent:
                 'summary': self._create_summary(profile, itinerary, budget),
                 'itinerary': itinerary.get('itinerary', {}),
                 'destination_info': destination.get('recommendations', {}),
+                'destination_data': destination_data,  # Rich data for customization
                 'weather_info': weather.get('weather', {}),
                 'budget_breakdown': budget.get('budget', {}),
                 'metadata': {

@@ -70,11 +70,17 @@ Return ONLY a valid JSON object with an array of daily plans.
             logger.info(f"ItineraryAgent creating itinerary for: {destination}")
             
             # Generate prompt
+            interests = profile.get('interests', [])
+            if isinstance(interests, list):
+                interests_str = ', '.join(str(i) for i in interests)
+            else:
+                interests_str = str(interests)
+            
             prompt = self._create_prompt(
                 self.itinerary_prompt,
                 duration=profile.get('duration', 7),
                 destination=destination,
-                interests=', '.join(profile.get('interests', [])),
+                interests=interests_str,
                 budget_level=profile.get('budget_level', 'moderate'),
                 travel_style=profile.get('travel_style', 'general'),
                 attractions=self._format_attractions(attractions),
@@ -86,9 +92,18 @@ Return ONLY a valid JSON object with an array of daily plans.
             response = await self._generate_response(prompt)
             
             # Parse JSON response
-            itinerary_data = self._parse_json_response(response)
+            try:
+                itinerary_data = self._parse_json_response(response)
+                # Ensure itinerary_data is a dict
+                if not isinstance(itinerary_data, dict):
+                    logger.warning(f"Itinerary data is not a dict: {type(itinerary_data)}")
+                    itinerary_data = {'days': itinerary_data if isinstance(itinerary_data, list) else []}
+            except Exception as parse_error:
+                logger.error(f"Failed to parse itinerary JSON: {parse_error}")
+                itinerary_data = {'days': []}
             
-            logger.info(f"ItineraryAgent created {len(itinerary_data.get('days', []))} day itinerary")
+            days_count = len(itinerary_data.get('days', [])) if isinstance(itinerary_data, dict) else 0
+            logger.info(f"ItineraryAgent created {days_count} day itinerary")
             
             return {
                 'success': True,

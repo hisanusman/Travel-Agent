@@ -1,5 +1,6 @@
 """
 Vector retrieval using Pinecone for travel knowledge
+Falls back to local JSON database when Pinecone is unavailable
 """
 
 from typing import List, Dict, Any, Optional
@@ -8,17 +9,65 @@ from backend.config import settings
 from backend.rag.embeddings import embedding_generator
 from loguru import logger
 import time
+import json
+from pathlib import Path
 
 class TravelKnowledgeRetriever:
-    """Retrieve relevant travel information using Pinecone vector database"""
+    """Retrieve relevant travel information using Pinecone vector database or local fallback"""
     
     def __init__(self):
         self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
         self.index_name = settings.PINECONE_INDEX_NAME
         self.dimension = 1536  # OpenAI ada-002 embedding dimension
         
+        # Load local travel database as fallback
+        self.local_db = self._load_local_database()
+        
         # Initialize or connect to index
         self._init_index()
+    
+    def _load_local_database(self) -> Dict[str, Any]:
+        """Load local travel database from JSON"""
+        try:
+            db_path = settings.BASE_DIR / "data" / "travel_database.json"
+            if db_path.exists():
+                with open(db_path, 'r') as f:
+                    data = json.load(f)
+                logger.info(f"✅ Loaded local travel database with {len(data)} destinations")
+                return data
+            else:
+                logger.warning("Local travel database not found")
+                return {}
+        except Exception as e:
+            logger.error(f"Error loading local database: {e}")
+            return {}
+    
+    def get_destination_data(self, destination: str) -> Dict[str, Any]:
+        """
+        Get all data for a specific destination from local database
+        
+        Args:
+            destination: Destination name (e.g., "maldives", "tokyo", "paris")
+            
+        Returns:
+            Dictionary with accommodations, activities, restaurants
+        """
+        # Normalize destination name
+        dest_key = destination.lower().strip()
+        
+        # Check if destination exists in local DB
+        if dest_key in self.local_db:
+            data = self.local_db[dest_key]
+            logger.info(f"📍 Retrieved {dest_key} data: {len(data.get('accommodations', []))} hotels, "
+                       f"{len(data.get('activities', []))} activities, {len(data.get('restaurants', []))} restaurants")
+            return data
+        else:
+            logger.warning(f"Destination '{destination}' not found in local database")
+            return {
+                "accommodations": [],
+                "activities": [],
+                "restaurants": []
+            }
     
     def _init_index(self):
         """Initialize Pinecone index if it doesn't exist"""

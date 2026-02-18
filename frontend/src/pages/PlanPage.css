@@ -119,6 +119,43 @@
   border-color: #667eea;
 }
 
+.plan-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.plan-header .header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.plan-header h1 {
+  margin: 0;
+}
+
+.customize-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  white-space: nowrap;
+}
+
+.customize-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
 .plan-display {
   max-width: 900px;
   margin: 0 auto;

@@ -38,21 +38,42 @@ Return ONLY a valid JSON object.
     
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Process destination query and return recommendations
+        Process destination query and return recommendations with full database options
         
         Args:
             input_data: Dict with profile information and destination
             
         Returns:
-            Destination recommendations and information
+            Destination recommendations with selectable options
         """
         try:
             profile = input_data.get('profile', {})
             destination = profile.get('destination', 'unknown')
             
+            # Handle list destinations (e.g., ['Maldives', 'islands'])
+            if isinstance(destination, list):
+                destination = destination[0] if destination else 'unknown'
+            
             logger.info(f"DestinationAgent processing destination: {destination}")
             
-            # Retrieve relevant context from RAG
+            # Get full destination data from local database
+            dest_data = travel_retriever.get_destination_data(destination)
+            
+            # If we have rich local data, use it directly
+            if dest_data and any(dest_data.values()):
+                logger.info(f"✅ Using rich local database for {destination}")
+                return {
+                    'success': True,
+                    'agent': self.name,
+                    'destination': destination,
+                    'accommodations': dest_data.get('accommodations', []),
+                    'activities': dest_data.get('activities', []),
+                    'restaurants': dest_data.get('restaurants', []),
+                    'has_detailed_options': True
+                }
+            
+            # Fallback to AI-generated recommendations if no local data
+            logger.info(f"No local data for {destination}, generating with AI...")
             context_docs = self._retrieve_context(destination, profile)
             context_text = self._format_context(context_docs)
             
@@ -62,7 +83,7 @@ Return ONLY a valid JSON object.
                 destination=destination,
                 context=context_text,
                 budget_level=profile.get('budget_level', 'moderate'),
-                interests=', '.join(profile.get('interests', [])),
+                interests=', '.join(profile.get('interests', [])) if isinstance(profile.get('interests', []), list) else str(profile.get('interests', '')),
                 duration=profile.get('duration', 'N/A'),
                 travel_style=profile.get('travel_style', 'general')
             )
@@ -73,13 +94,14 @@ Return ONLY a valid JSON object.
             # Parse JSON response
             destination_data = self._parse_json_response(response)
             
-            logger.info(f"DestinationAgent generated recommendations for {destination}")
+            logger.info(f"DestinationAgent generated AI recommendations for {destination}")
             
             return {
                 'success': True,
                 'agent': self.name,
                 'destination': destination,
-                'recommendations': destination_data
+                'recommendations': destination_data,
+                'has_detailed_options': False
             }
             
         except Exception as e:
