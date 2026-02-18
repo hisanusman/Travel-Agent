@@ -361,6 +361,33 @@ Full API documentation available at `/docs` when running the backend.
 - [ ] Social features (reviews, photos)
 - [ ] AI-powered travel assistant chat
 
+## 🌍 Available Destinations
+
+The system now includes **11 destinations** with full interactive customization:
+
+### European Cities (7)
+1. **Amsterdam** 🇳🇱 - 3 hotels, 5 activities, 4 restaurants
+2. **Barcelona** 🇪🇸 - 3 hotels, 6 activities, 4 restaurants  
+3. **Budapest** 🇭🇺 - 3 hotels, 5 activities, 4 restaurants
+4. **London** 🇬🇧 - 3 hotels, 6 activities, 4 restaurants
+5. **Madrid** 🇪🇸 - 3 hotels, 6 activities, 4 restaurants
+6. **Prague** 🇨🇿 - 3 hotels, 5 activities, 4 restaurants
+7. **Rome** 🇮🇹 - 3 hotels, 5 activities, 4 restaurants
+8. **Vienna** 🇦🇹 - 3 hotels, 5 activities, 4 restaurants
+
+### Other Destinations (3)
+9. **Maldives** 🇲🇻 - 3 resorts, 5 activities, 4 restaurants
+10. **Paris** 🇫🇷 - 3 hotels, 5 activities, 4 restaurants
+11. **Tokyo** 🇯🇵 - 3 accommodations, 5 activities, 4 restaurants
+
+For these destinations, users get:
+- ✅ Real hotel/restaurant/activity options to choose from
+- ✅ Interactive customization with "🎨 Customize Your Trip" button
+- ✅ Personalized calendar after making selections
+- ✅ Detailed prices, ratings, descriptions, amenities
+
+**Any other destination**: AI-generated recommendations with detailed itinerary (but no interactive customization yet)
+
 ---
 
 *Last updated: February 17, 2026*
