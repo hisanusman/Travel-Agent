@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════╗
+║          🌍 TRAVEL AGENT - QUICK START GUIDE                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 SYSTEM CHECK
+═══════════════
+✅ Project structure created
+✅ Virtual environment set up
+✅ Dependencies installed
+✅ API keys configured in .env
+✅ Backend code complete (FastAPI + Multi-agent system)
+✅ Frontend code complete (React)
+✅ Database initialized (SQLite)
+✅ Export features ready (PDF, iCal, Maps)
+✅ Documentation complete
+
+🚀 RUN THE APPLICATION
+═══════════════════════
+
+Option 1: Development Mode
+──────────────────────────
+Terminal 1:  ./run_backend.sh
+Terminal 2:  ./run_frontend.sh
+
+Option 2: Docker
+────────────────
+docker-compose up --build
+
+📍 ACCESS POINTS
+════════════════
+• Frontend:  http://localhost:3000
+• Backend:   http://localhost:8000
+• API Docs:  http://localhost:8000/docs
+
+🎯 FIRST TEST
+═════════════
+1. Open http://localhost:3000
+2. Click "Start Planning Your Trip"
+3. Enter: "Plan a 7-day trip to Tokyo in spring on a moderate budget"
+4. Wait 30-60 seconds for AI to generate your plan
+5. Export as PDF, iCal, or Map!
+
+⚠️  IMPORTANT NOTES
+═══════════════════
+• Keep .env file secure (contains API keys)
+• First API call may take longer (cold start)
+• Pinecone index starts empty (agents work without data)
+• Monitor API usage to avoid unexpected costs
+
+📚 DOCUMENTATION
+════════════════
+• PROJECT_SUMMARY.md  - Complete overview
+• AGENTS.md          - Architecture & features
+• README_SETUP.md    - Setup & troubleshooting
+• DEPLOYMENT.md      - Deployment instructions
+
+🌐 DEPLOYMENT
+═════════════
+When ready to deploy:
+  npm install -g vercel
+  vercel --prod
+
+💡 TIPS
+═══════
+• Backend must run before frontend
+• Use provided example prompts for testing
+• Check /docs for API documentation
+• Monitor terminal for logs and errors
+
+🎊 PROJECT STATS
+════════════════
+• 5,000+ lines of code
+• 6 AI agents
+• 8 API endpoints
+• 3 export formats
+• 15+ technologies
+
+✨ YOU'RE ALL SET! Start the servers and plan your trip! ✨
+
+═══════════════════════════════════════════════════════════════
+Need help? Check the documentation files listed above.
+═══════════════════════════════════════════════════════════════
