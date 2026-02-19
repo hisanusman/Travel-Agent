@@ -17,8 +17,11 @@ function HomePage() {
           <p className="hero-subtitle">
             Tell us your dream destination, and let our intelligent agents create the perfect itinerary for you
           </p>
-          <button className="btn btn-primary btn-large" onClick={() => navigate('/plan')}>
+          <button className="btn btn-primary btn-large" onClick={() => navigate('/chat')}>
             Start Planning Your Trip
+          </button>
+          <button className="btn btn-secondary btn-large" onClick={() => navigate('/plan')} style={{marginLeft: '1rem'}}>
+            Use Classic Form
           </button>
         </div>
       </header>

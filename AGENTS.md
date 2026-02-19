@@ -1,38 +1,44 @@
 # 🌍 Agentic Travel Planner
 
-An intelligent, conversational travel planning system powered by multi-agent architecture using Google's Agent Development Kit.
+An intelligent, **conversational** travel planning system powered by multi-agent architecture with natural language interaction.
 
 ## 📋 Project Overview
 
 This application provides an AI-powered travel assistant that can:
+- **Converse naturally** with users to understand their travel needs
 - Generate personalized itineraries based on natural language queries
+- Ask smart follow-up questions to gather missing information
+- Provide context-aware recommendations (opening hours, entry fees, best times)
+- Intelligently filter options based on budget constraints
 - Create day-by-day travel plans with activities, transportation, and timing
 - Provide weather-aware recommendations
 - Estimate budgets and optimize costs
 - Export itineraries as PDF, iCal, interactive maps, and budget reports
-- Support follow-up conversations to refine plans
+- Support multi-turn conversations to refine plans
 
 ## 🏗️ Architecture
 
 ### Multi-Agent System
 
-The system uses specialized MCP (Model Context Protocol) agents:
+The system uses specialized agents coordinated through a conversational interface:
 
-1. **Profile Agent** - Manages user preferences, budget, dates, and interests
-2. **Destination & Attractions Agent** - Retrieves POIs, attractions, and local tips using RAG
-3. **Itinerary Planner Agent** - Creates optimized day-by-day schedules
-4. **Weather & Timing Agent** - Provides weather-based recommendations
-5. **Budget & Costs Agent** - Estimates costs and optimizes expenses
-6. **Decision & Fusion Agent** - Orchestrates agents and consolidates outputs
+1. **Conversation Agent** - Manages multi-turn dialogue, extracts information progressively, asks clarifying questions
+2. **Profile Agent** - Manages user preferences, budget, dates, and interests
+3. **Destination & Attractions Agent** - Retrieves POIs, attractions, and local tips from knowledge base
+4. **Itinerary Planner Agent** - Creates optimized day-by-day schedules
+5. **Weather & Timing Agent** - Provides weather-based recommendations
+6. **Budget & Costs Agent** - Estimates costs and optimizes expenses
+7. **Orchestrator Agent** - Coordinates all agents and consolidates outputs
 
 ### Tech Stack
 
 - **Backend**: FastAPI (Python)
 - **Frontend**: React
-- **Agent Framework**: Google Agent Development Kit
-- **Vector Database**: Pinecone (RAG for travel knowledge)
-- **Database**: SQLite (user profiles, trips)
-- **Deployment**: Vercel
+- **AI Providers**: OpenAI → Google Gemini → Groq (automatic fallback)
+- **Knowledge Base**: Local JSON database with 19 European cities (855 items)
+- **Vector Database**: Pinecone (optional RAG enhancement)
+- **Database**: SQLite (user profiles, trips, conversations)
+- **Deployment**: Docker, Vercel-ready
 - **Containerization**: Docker
 
 ## 📁 Project Structure
@@ -40,25 +46,29 @@ The system uses specialized MCP (Model Context Protocol) agents:
 ```
 TravelAgent/
 ├── backend/
-│   ├── agents/              # MCP agent implementations
+│   ├── agents/              # Agent implementations
 │   │   ├── __init__.py
+│   │   ├── multi_provider_agent.py  # Base agent with AI fallback
 │   │   ├── profile_agent.py
 │   │   ├── destination_agent.py
 │   │   ├── itinerary_agent.py
 │   │   ├── weather_agent.py
 │   │   ├── budget_agent.py
 │   │   └── orchestrator.py
+│   ├── conversation/        # Conversational interface
+│   │   ├── __init__.py
+│   │   ├── agent.py         # ConversationAgent
+│   │   └── state.py         # State management
 │   ├── api/                 # FastAPI routes
 │   │   ├── __init__.py
-│   │   ├── routes.py
-│   │   └── models.py
+│   │   ├── routes.py        # Main travel planning routes
+│   │   └── conversation_routes.py  # Conversation routes
 │   ├── database/            # Database models and operations
 │   │   ├── __init__.py
 │   │   ├── models.py
 │   │   └── db.py
-│   ├── rag/                 # RAG implementation
+│   ├── rag/                 # Knowledge retrieval
 │   │   ├── __init__.py
-│   │   ├── embeddings.py
 │   │   └── retrieval.py
 │   ├── exports/             # Export handlers (PDF, iCal, etc.)
 │   │   ├── __init__.py
@@ -71,19 +81,24 @@ TravelAgent/
 │   ├── public/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── ChatInterface.jsx     # Conversational UI
+│   │   │   └── OptionCard.jsx
 │   │   ├── pages/
-│   │   ├── services/
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── ConversationPage.jsx  # Chat page
+│   │   │   ├── PlanPage.jsx          # Classic form
+│   │   │   ├── SelectionPage.jsx     # Customization
+│   │   │   └── TripDetailsPage.jsx
 │   │   ├── App.jsx
 │   │   └── index.js
 │   └── package.json
-├── data/                    # Travel guide data for RAG
-│   └── guides/
+├── data/                    # Travel database
+│   └── travel_database.json  # 19 European cities, 855 items
 ├── .env.example             # Example environment variables
 ├── .gitignore
 ├── requirements.txt         # Python dependencies
 ├── Dockerfile
 ├── docker-compose.yml
-├── vercel.json              # Vercel deployment config
 └── AGENTS.md                # This file
 ```
 
@@ -203,7 +218,38 @@ vercel --prod
 
 ## 🔄 Version History
 
-### v0.1.0 (Current - February 17, 2026)
+### v0.6.0 (Current - February 18, 2026) 🆕
+- ✅ **Conversational Interface**: Natural language multi-turn dialogue system
+- ✅ ConversationAgent for intelligent question flow
+- ✅ Progressive information gathering with completeness tracking
+- ✅ Context-aware follow-up questions
+- ✅ Budget-intelligent filtering (auto-applies constraints)
+- ✅ Beautiful chat UI with message bubbles and quick replies
+- ✅ Real-time progress indicator
+- ✅ New routes: `/chat` (conversational), `/plan` (classic form)
+- ✅ Smart extraction of destination, duration, budget, interests from natural language
+
+### v0.5.0 (February 18, 2026)
+- ✅ Massive database expansion to 19 European cities
+- ✅ Each city now has 15+ hotels, activities, and restaurants (855 total items)
+- ✅ Added opening hours, entry fees, best times to visit for all activities
+- ✅ Removed non-European destinations (Maldives, Tokyo)
+- ✅ Added new cities: Venice, Florence, Athens, Santorini, Lisbon, Edinburgh, Dubrovnik, Berlin, Munich, Copenhagen
+- ✅ Database file: 13,897 lines, 402KB
+
+### v0.4.0 (February 18, 2026)
+- ✅ Added 7 European destinations with basic data
+- ✅ Cleaned up repository documentation
+
+### v0.3.0 (February 18, 2026)
+- ✅ Fixed itinerary generation bug
+- ✅ Added Madrid to database
+- ✅ Full interactive customization UI
+
+### v0.2.0 (February 17, 2026)
+- ✅ Multi-provider AI fallback system (OpenAI → Google → Groq)
+
+### v0.1.0 (February 17, 2026)
 - ✅ Complete project structure
 - ✅ Multi-agent system with 5 specialized agents
 - ✅ RAG backend with Pinecone integration
@@ -363,32 +409,42 @@ Full API documentation available at `/docs` when running the backend.
 
 ## 🌍 Available Destinations
 
-The system now includes **11 destinations** with full interactive customization:
+The system now includes **19 European destinations** with full interactive customization:
 
-### European Cities (7)
-1. **Amsterdam** 🇳🇱 - 3 hotels, 5 activities, 4 restaurants
-2. **Barcelona** 🇪🇸 - 3 hotels, 6 activities, 4 restaurants  
-3. **Budapest** 🇭🇺 - 3 hotels, 5 activities, 4 restaurants
-4. **London** 🇬🇧 - 3 hotels, 6 activities, 4 restaurants
-5. **Madrid** 🇪🇸 - 3 hotels, 6 activities, 4 restaurants
-6. **Prague** 🇨🇿 - 3 hotels, 5 activities, 4 restaurants
-7. **Rome** 🇮🇹 - 3 hotels, 5 activities, 4 restaurants
-8. **Vienna** 🇦🇹 - 3 hotels, 5 activities, 4 restaurants
+### Western Europe
+1. **Amsterdam** 🇳🇱 - 15 hotels, 15 activities, 15 restaurants
+2. **Barcelona** 🇪🇸 - 15 hotels, 15 activities, 15 restaurants
+3. **Berlin** 🇩🇪 - 15 hotels, 15 activities, 15 restaurants
+4. **Edinburgh** 🏴󠁧󠁢󠁳󠁣󠁴󠁿 - 15 hotels, 15 activities, 15 restaurants
+5. **Lisbon** 🇵🇹 - 15 hotels, 15 activities, 15 restaurants
+6. **London** 🇬🇧 - 15 hotels, 15 activities, 15 restaurants
+7. **Madrid** 🇪🇸 - 15 hotels, 15 activities, 15 restaurants
+8. **Munich** 🇩🇪 - 15 hotels, 15 activities, 15 restaurants
+9. **Paris** 🇫🇷 - 15 hotels, 15 activities, 15 restaurants
 
-### Other Destinations (3)
-9. **Maldives** 🇲🇻 - 3 resorts, 5 activities, 4 restaurants
-10. **Paris** 🇫🇷 - 3 hotels, 5 activities, 4 restaurants
-11. **Tokyo** 🇯🇵 - 3 accommodations, 5 activities, 4 restaurants
+### Central & Eastern Europe
+10. **Budapest** 🇭🇺 - 15 hotels, 15 activities, 15 restaurants
+11. **Copenhagen** 🇩🇰 - 15 hotels, 15 activities, 15 restaurants
+12. **Prague** 🇨🇿 - 15 hotels, 15 activities, 15 restaurants
+13. **Vienna** 🇦🇹 - 15 hotels, 15 activities, 15 restaurants
 
-For these destinations, users get:
-- ✅ Real hotel/restaurant/activity options to choose from
-- ✅ Interactive customization with "🎨 Customize Your Trip" button
-- ✅ Personalized calendar after making selections
-- ✅ Detailed prices, ratings, descriptions, amenities
+### Southern Europe & Islands
+14. **Athens** 🇬🇷 - 15 hotels, 15 activities, 15 restaurants
+15. **Dubrovnik** 🇭🇷 - 15 hotels, 15 activities, 15 restaurants
+16. **Florence** 🇮🇹 - 15 hotels, 15 activities, 15 restaurants
+17. **Rome** 🇮🇹 - 15 hotels, 15 activities, 15 restaurants
+18. **Santorini** 🇬🇷 - 15 hotels, 15 activities, 15 restaurants
+19. **Venice** 🇮🇹 - 15 hotels, 15 activities, 15 restaurants
+
+### Database Statistics
+- **Total Items:** 855 (285 accommodations, 285 activities, 285 restaurants)
+- **Each destination includes:** Opening hours, entry fees, best times to visit, price ranges, ratings, detailed descriptions
+- **Interactive Features:** Users can select specific hotels, activities, and restaurants to create personalized itineraries
 
 **Any other destination**: AI-generated recommendations with detailed itinerary (but no interactive customization yet)
 
 ---
 
-*Last updated: February 17, 2026*
-*Status: Ready for testing and deployment*
+*Last updated: February 18, 2026*  
+*Status: ✅ Conversational interface fully implemented and ready for testing*  
+*Version: 0.6.0*

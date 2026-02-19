@@ -19,7 +19,7 @@ Traveler Profile:
 - Budget Level: {budget_level}
 - Travel Style: {travel_style}
 
-Available Attractions and Activities:
+Available Hotels, Activities & Restaurants:
 {attractions}
 
 Weather Considerations:
@@ -28,26 +28,52 @@ Weather Considerations:
 Budget Constraints:
 {budget_info}
 
-Create a detailed day-by-day itinerary in JSON format:
-- day_number: Day 1, 2, etc.
-- date: Actual date if available
-- theme: Theme or focus for the day
-- morning: Activity with time, location, duration, description, cost
-- afternoon: Activity with time, location, duration, description, cost
-- evening: Activity with time, location, duration, description, cost
-- meals: Breakfast, lunch, dinner recommendations
-- transportation: How to get between locations
-- estimated_cost: Daily cost
-- notes: Tips, alternatives, or important information
+IMPORTANT: Create a COMPLETE day-by-day itinerary that MUST include:
+1. Specific hotel recommendations from the available hotels list
+2. Specific activities with times (morning/afternoon/evening) from the activities list
+3. Specific restaurant recommendations for meals from the restaurants list
+4. Include entry fees, opening hours, and other details
+5. Estimated costs for each day
 
-Optimize for:
-- Geographical proximity (minimize travel time)
-- Logical flow and pacing
-- Weather suitability
-- Budget adherence
-- Interest alignment
+Return a JSON object with this EXACT structure:
+{{
+  "days": [
+    {{
+      "day_number": 1,
+      "theme": "Arrival & Historic Center",
+      "activities": [
+        {{
+          "time": "Morning (9:00 AM)",
+          "name": "Specific activity name from the available activities",
+          "description": "What you'll do and see",
+          "location": "Specific location",
+          "duration": "2 hours",
+          "cost": "$25"
+        }},
+        {{
+          "time": "Afternoon (2:00 PM)",
+          "name": "Another specific activity",
+          "description": "Description",
+          "location": "Location",
+          "duration": "3 hours",
+          "cost": "$40"
+        }},
+        {{
+          "time": "Evening (7:00 PM)",
+          "name": "Dinner at [Specific Restaurant Name]",
+          "description": "Cuisine type and specialties",
+          "location": "Restaurant location",
+          "duration": "2 hours",
+          "cost": "$45"
+        }}
+      ],
+      "accommodation": "Specific hotel name from available hotels with price per night",
+      "estimated_cost": "$200"
+    }}
+  ]
+}}
 
-Return ONLY a valid JSON object with an array of daily plans.
+Create all {duration} days following this structure. Use REAL names from the available lists above!
 """
     
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -121,10 +147,48 @@ Return ONLY a valid JSON object with an array of daily plans.
             }
     
     def _format_attractions(self, attractions: Dict[str, Any]) -> str:
-        """Format attractions data for prompt"""
+        """Format attractions data for prompt with rich details"""
         if not attractions:
-            return "Use your knowledge of popular attractions"
+            return "General attractions and activities available"
         
+        # Check if we have rich structured data (from local database)
+        if attractions.get('accommodations') or attractions.get('activities') or attractions.get('restaurants'):
+            formatted = []
+            
+            # Format Hotels
+            if attractions.get('accommodations'):
+                formatted.append("\n**AVAILABLE HOTELS:**")
+                for hotel in attractions['accommodations'][:10]:  # Top 10
+                    formatted.append(f"  - {hotel.get('name')} ({hotel.get('category', 'Standard')})")
+                    formatted.append(f"    Price: {hotel.get('price_per_night', 'TBD')}/night, Rating: {hotel.get('rating', 'N/A')}")
+                    if hotel.get('amenities'):
+                        formatted.append(f"    Amenities: {', '.join(hotel['amenities'][:3])}")
+            
+            # Format Activities
+            if attractions.get('activities'):
+                formatted.append("\n**AVAILABLE ACTIVITIES:**")
+                for activity in attractions['activities'][:15]:  # Top 15
+                    formatted.append(f"  - {activity.get('name')} ({activity.get('category', 'Activity')})")
+                    formatted.append(f"    {activity.get('description', '')[:100]}")
+                    if activity.get('entry_fee'):
+                        formatted.append(f"    Entry Fee: {activity['entry_fee']}")
+                    if activity.get('opening_hours'):
+                        formatted.append(f"    Hours: {activity['opening_hours']}")
+                    if activity.get('best_time'):
+                        formatted.append(f"    Best Time: {activity['best_time']}")
+            
+            # Format Restaurants
+            if attractions.get('restaurants'):
+                formatted.append("\n**AVAILABLE RESTAURANTS:**")
+                for restaurant in attractions['restaurants'][:10]:  # Top 10
+                    formatted.append(f"  - {restaurant.get('name')} ({restaurant.get('cuisine', 'Local')})")
+                    formatted.append(f"    Price: {restaurant.get('price_range', 'Moderate')}, Rating: {restaurant.get('rating', 'N/A')}")
+                    if restaurant.get('specialties'):
+                        formatted.append(f"    Specialties: {', '.join(restaurant['specialties'][:2])}")
+            
+            return '\n'.join(formatted)
+        
+        # Fallback for text-based recommendations
         recs = attractions.get('recommendations', {})
         formatted = []
         
@@ -157,7 +221,4 @@ Return ONLY a valid JSON object with an array of daily plans.
             return "No specific budget constraints"
         
         budget_data = budget.get('budget', {})
-        total = budget_data.get('total_estimated', 'N/A')
-        daily = budget_data.get('daily_average', 'N/A')
-        
-        return f"Total Budget: ${total}, Daily Average: ${daily}"
+        return f"Total budget: ${budget_data.get('total_cost', 'flexible')}, Daily average: ${budget_data.get('daily_average', 'flexible')}"

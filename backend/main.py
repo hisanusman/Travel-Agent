@@ -47,6 +47,10 @@ app.add_middleware(
 # Include API routes
 app.include_router(router, prefix="/api/v1", tags=["Travel Planning"])
 
+# Include conversation routes
+from backend.api.conversation_routes import router as conversation_router
+app.include_router(conversation_router, tags=["Conversation"])
+
 # Mount exports directory for file downloads
 if settings.EXPORTS_DIR.exists():
     app.mount("/downloads", StaticFiles(directory=str(settings.EXPORTS_DIR)), name="downloads")
