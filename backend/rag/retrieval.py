@@ -13,61 +13,118 @@ import json
 from pathlib import Path
 
 class TravelKnowledgeRetriever:
-    """Retrieve relevant travel information using Pinecone vector database or local fallback"""
+    """Retrieve relevant travel information using Pinecone vector database"""
     
     def __init__(self):
         self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
         self.index_name = settings.PINECONE_INDEX_NAME
-        self.dimension = 1536  # OpenAI ada-002 embedding dimension
-        
-        # Load local travel database as fallback
-        self.local_db = self._load_local_database()
+        self.dimension = 384  # sentence-transformers all-MiniLM-L6-v2
         
         # Initialize or connect to index
         self._init_index()
     
-    def _load_local_database(self) -> Dict[str, Any]:
-        """Load local travel database from JSON"""
-        try:
-            db_path = settings.BASE_DIR / "data" / "travel_database.json"
-            if db_path.exists():
-                with open(db_path, 'r') as f:
-                    data = json.load(f)
-                logger.info(f"✅ Loaded local travel database with {len(data)} destinations")
-                return data
-            else:
-                logger.warning("Local travel database not found")
-                return {}
-        except Exception as e:
-            logger.error(f"Error loading local database: {e}")
-            return {}
-    
     def get_destination_data(self, destination: str) -> Dict[str, Any]:
         """
-        Get all data for a specific destination from local database
+        Get all data for a specific destination from Pinecone
         
         Args:
-            destination: Destination name (e.g., "maldives", "tokyo", "paris")
+            destination: Destination name (e.g., "venice", "paris", "rome")
             
         Returns:
             Dictionary with accommodations, activities, restaurants
         """
-        # Normalize destination name
-        dest_key = destination.lower().strip()
-        
-        # Check if destination exists in local DB
-        if dest_key in self.local_db:
-            data = self.local_db[dest_key]
-            logger.info(f"📍 Retrieved {dest_key} data: {len(data.get('accommodations', []))} hotels, "
-                       f"{len(data.get('activities', []))} activities, {len(data.get('restaurants', []))} restaurants")
-            return data
-        else:
-            logger.warning(f"Destination '{destination}' not found in local database")
+        try:
+            # Normalize destination name
+            dest_key = destination.lower().strip()
+            
+            if not self.index:
+                logger.error("Pinecone index not available!")
+                return {"accommodations": [], "activities": [], "restaurants": []}
+            
+            # Query for hotels
+            hotels = self._query_by_city_and_type(dest_key, "hotel", top_k=15)
+            
+            # Query for activities
+            activities = self._query_by_city_and_type(dest_key, "activity", top_k=15)
+            
+            # Query for restaurants
+            restaurants = self._query_by_city_and_type(dest_key, "restaurant", top_k=15)
+            
+            logger.info(f"📍 Retrieved {dest_key} from Pinecone: {len(hotels)} hotels, "
+                       f"{len(activities)} activities, {len(restaurants)} restaurants")
+            
             return {
-                "accommodations": [],
-                "activities": [],
-                "restaurants": []
+                "accommodations": hotels,
+                "activities": activities,
+                "restaurants": restaurants
             }
+            
+        except Exception as e:
+            logger.error(f"Error retrieving destination data from Pinecone: {e}")
+            return {"accommodations": [], "activities": [], "restaurants": []}
+    
+    def _query_by_city_and_type(self, city: str, item_type: str, top_k: int = 15) -> List[Dict[str, Any]]:
+        """Query Pinecone for specific city and type"""
+        try:
+            # Create query text
+            query_text = f"{item_type} in {city}"
+            
+            # Generate embedding
+            from backend.rag.embeddings import embedding_generator
+            query_embedding = embedding_generator.generate_embedding(query_text)
+            
+            # Query Pinecone with metadata filter
+            results = self.index.query(
+                vector=query_embedding,
+                top_k=top_k,
+                filter={"city": city, "type": item_type},
+                include_metadata=True
+            )
+            
+            # Convert to list of dictionaries
+            items = []
+            for match in results.get('matches', []):
+                metadata = match.get('metadata', {})
+                
+                # Reconstruct item from metadata
+                item = {
+                    'name': metadata.get('name', ''),
+                    'description': metadata.get('description', ''),
+                    'rating': metadata.get('rating', 'N/A')
+                }
+                
+                # Add type-specific fields
+                if item_type == "hotel":
+                    item.update({
+                        'category': metadata.get('category', 'Standard'),
+                        'price_per_night': metadata.get('price_per_night', 'TBD'),
+                        'amenities': metadata.get('amenities', '').split(',') if metadata.get('amenities') else [],
+                        'location': metadata.get('location', '')
+                    })
+                elif item_type == "activity":
+                    item.update({
+                        'category': metadata.get('category', 'Activity'),
+                        'entry_fee': metadata.get('entry_fee', 'Free'),
+                        'opening_hours': metadata.get('opening_hours', 'Varies'),
+                        'best_time': metadata.get('best_time', 'Anytime'),
+                        'duration': metadata.get('duration', 'Varies')
+                    })
+                elif item_type == "restaurant":
+                    item.update({
+                        'cuisine': metadata.get('cuisine', 'Local'),
+                        'price_range': metadata.get('price_range', 'Moderate'),
+                        'specialties': metadata.get('specialties', '').split(',') if metadata.get('specialties') else [],
+                        'opening_hours': metadata.get('opening_hours', 'Varies'),
+                        'reservation': metadata.get('reservation', 'Not required')
+                    })
+                
+                items.append(item)
+            
+            return items
+            
+        except Exception as e:
+            logger.error(f"Error querying Pinecone for {city} {item_type}: {e}")
+            return []
     
     def _init_index(self):
         """Initialize Pinecone index if it doesn't exist"""

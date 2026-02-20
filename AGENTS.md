@@ -35,9 +35,9 @@ The system uses specialized agents coordinated through a conversational interfac
 - **Backend**: FastAPI (Python)
 - **Frontend**: React
 - **AI Providers**: OpenAI → Google Gemini → Groq (automatic fallback)
-- **Knowledge Base**: Local JSON database with 19 European cities (855 items)
-- **Vector Database**: Pinecone (optional RAG enhancement)
+- **Vector Database**: Pinecone (Primary data source for RAG)
 - **Database**: SQLite (user profiles, trips, conversations)
+- **Embeddings**: `sentence-transformers` (all-MiniLM-L6-v2) for local, free embeddings
 - **Deployment**: Docker, Vercel-ready
 - **Containerization**: Docker
 
@@ -218,7 +218,14 @@ vercel --prod
 
 ## 🔄 Version History
 
-### v0.6.0 (Current - February 18, 2026) 🆕
+### v0.7.0 (Current - February 20, 2026) 🚀
+- ✅ **Full Vector DB Migration**: Completely migrated from local JSON to Pinecone vector database
+- ✅ **Local Embeddings**: Integrated `sentence-transformers` (all-MiniLM-L6-v2) for 100% free, fast, and local embedding generation
+- ✅ **Semantic Search**: Upgraded retrieval system to query Pinecone using semantic similarity + metadata filters
+- ✅ Removed JSON data dependency entirely (deleted `travel_database.json`)
+- ✅ Uploaded all 855 items (accommodations, activities, restaurants) for 19 European cities into the Pinecone index
+
+### v0.6.0 (February 19, 2026)
 - ✅ **Conversational Interface**: Natural language multi-turn dialogue system
 - ✅ ConversationAgent for intelligent question flow
 - ✅ Progressive information gathering with completeness tracking
@@ -445,7 +452,7 @@ The system now includes **19 European destinations** with full interactive custo
 
 ---
 
-*Last updated: February 19, 2026*  
-*Status: ✅ Conversational interface fully implemented with detailed itineraries*  
-*Version: 0.6.0*  
+*Last updated: February 20, 2026*  
+*Status: ✅ Fully migrated to Pinecone RAG Architecture*  
+*Version: 0.7.0*  
 *Latest commit: ea4e883 - Implement conversational interface with detailed itinerary generation*
