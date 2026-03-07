@@ -138,20 +138,34 @@ class ConversationContext:
         return context
 
 
-# In-memory storage (will be replaced with DB in production)
-_conversations: Dict[str, ConversationContext] = {}
+import uuid
+from pathlib import Path
+
+_SESSIONS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "sessions"
+_SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
+
+def _session_path(conversation_id: str) -> Path:
+    return _SESSIONS_DIR / f"{conversation_id}.json"
 
 def get_conversation(conversation_id: str) -> Optional[ConversationContext]:
-    """Retrieve a conversation by ID"""
-    return _conversations.get(conversation_id)
+    """Retrieve a conversation by ID from disk."""
+    path = _session_path(conversation_id)
+    if not path.exists():
+        return None
+    try:
+        with open(path, "r") as f:
+            return ConversationContext.from_dict(json.load(f))
+    except Exception:
+        return None
 
 def save_conversation(context: ConversationContext):
-    """Save conversation context"""
-    _conversations[context.conversation_id] = context
+    """Persist conversation context to disk."""
+    path = _session_path(context.conversation_id)
+    with open(path, "w") as f:
+        json.dump(context.to_dict(), f)
 
 def create_conversation() -> ConversationContext:
-    """Create a new conversation"""
-    import uuid
+    """Create a new conversation and persist it."""
     conversation_id = str(uuid.uuid4())
     context = ConversationContext(conversation_id)
     save_conversation(context)

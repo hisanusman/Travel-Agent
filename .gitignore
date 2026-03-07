@@ -29,8 +29,6 @@ ENV/
 env/
 
 # Environment variables
-.env
-.env.local
 .env.*.local
 
 # IDE
@@ -80,6 +78,7 @@ exports/*.ics
 # Data
 data/raw/
 data/processed/
+data/sessions/
 *.csv
 *.json
 
@@ -90,3 +89,4 @@ data/processed/
 tmp/
 temp/
 *.tmp
+config.bat
