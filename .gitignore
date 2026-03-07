@@ -80,6 +80,7 @@ exports/*.ics
 # Data
 data/raw/
 data/processed/
+data/sessions/
 *.csv
 *.json
 
