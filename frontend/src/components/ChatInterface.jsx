@@ -145,12 +145,13 @@ function ChatInterface({ onPlanReady }) {
     }
   };
 
-  const sendMessage = async (message) => {
+  const sendMessage = async (message, retryAfterRestart = false) => {
     if (!message.trim() || !conversationId) return;
 
-    // Add user message to UI
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
-    setInput('');
+    if (!retryAfterRestart) {
+      setMessages(prev => [...prev, { role: 'user', content: message }]);
+      setInput('');
+    }
     setLoading(true);
 
     try {
@@ -163,9 +164,18 @@ function ChatInterface({ onPlanReady }) {
         }
       );
 
+      // Session expired (server restarted) — restart silently and replay the message
+      if (response.status === 404) {
+        await restartAndReplay(message);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
       
-      // Add agent response
       setMessages(prev => [...prev, {
         role: 'agent',
         content: data.agent_message,
@@ -188,6 +198,30 @@ function ChatInterface({ onPlanReady }) {
     }
   };
 
+  const restartAndReplay = async (pendingMessage) => {
+    try {
+      const response = await fetch('http://localhost:3303/api/v1/conversation/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      setConversationId(data.conversation_id);
+      setProfile(data.profile);
+      setCompleteness(data.completeness);
+      setIsReady(data.is_ready);
+      // Now replay the user's message in the new session
+      await sendMessage(pendingMessage, true);
+    } catch (error) {
+      console.error('Error restarting conversation:', error);
+      setMessages(prev => [...prev, {
+        role: 'agent',
+        content: "The session was reset. Please send your message again."
+      }]);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     sendMessage(input);
@@ -205,17 +239,29 @@ function ChatInterface({ onPlanReady }) {
         { method: 'POST' }
       );
 
+      if (response.status === 404) {
+        setMessages(prev => [...prev, {
+          role: 'agent',
+          content: "It looks like the session expired. Please describe your trip again and I'll get your plan ready!"
+        }]);
+        setIsReady(false);
+        await startConversation();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (data.success && data.plan) {
-        // Display the plan inline
         setMessages(prev => [...prev, {
           role: 'agent',
           content: '✅ Your personalized travel plan is ready!',
           isPlan: true,
           planData: data.plan
         }]);
-        
         setIsReady(false);
       }
     } catch (error) {
