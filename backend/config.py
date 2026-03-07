@@ -31,10 +31,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     
     # Frontend URL (for CORS)
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = "http://localhost:3033"
     
     # Backend URL
-    BACKEND_URL: str = "http://localhost:8000"
+    BACKEND_URL: str = "http://localhost:3303"
     
     # Project paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
