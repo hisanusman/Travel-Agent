@@ -117,7 +117,7 @@ function ChatInterface({ onPlanReady }) {
 
   const startConversation = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/conversation/start', {
+      const response = await fetch('http://localhost:3303/api/v1/conversation/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -155,7 +155,7 @@ function ChatInterface({ onPlanReady }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/conversation/${conversationId}/message`,
+        `http://localhost:3303/api/v1/conversation/${conversationId}/message`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -201,7 +201,7 @@ function ChatInterface({ onPlanReady }) {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/conversation/${conversationId}/finalize`,
+        `http://localhost:3303/api/v1/conversation/${conversationId}/finalize`,
         { method: 'POST' }
       );
 

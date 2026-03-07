@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, DollarSign, Sparkles } from 'lucide-react';
+import { MapPin, Calendar, DollarSign, Sparkles, MessageCircle } from 'lucide-react';
 import './HomePage.css';
 
 function HomePage() {
@@ -15,13 +15,11 @@ function HomePage() {
             AI-Powered Travel Planning
           </h1>
           <p className="hero-subtitle">
-            Tell us your dream destination, and let our intelligent agents create the perfect itinerary for you
+            Chat with our AI assistant to plan your perfect trip. Get personalized itineraries with hotels, restaurants, and activities across 19 European destinations.
           </p>
           <button className="btn btn-primary btn-large" onClick={() => navigate('/chat')}>
+            <MessageCircle size={20} style={{marginRight: '0.5rem'}} />
             Start Planning Your Trip
-          </button>
-          <button className="btn btn-secondary btn-large" onClick={() => navigate('/plan')} style={{marginLeft: '1rem'}}>
-            Use Classic Form
           </button>
         </div>
       </header>
@@ -31,27 +29,27 @@ function HomePage() {
           <h2 className="section-title">How It Works</h2>
           <div className="features-grid">
             <div className="feature-card">
+              <MessageCircle className="feature-icon" size={48} />
+              <h3>Chat Naturally</h3>
+              <p>Describe your trip in plain language — our AI understands your preferences instantly</p>
+            </div>
+            
+            <div className="feature-card">
               <MapPin className="feature-icon" size={48} />
-              <h3>Describe Your Trip</h3>
-              <p>Simply tell us where you want to go, your interests, and travel style</p>
+              <h3>Smart Recommendations</h3>
+              <p>Get specific hotels, restaurants, and activities pulled from our curated database</p>
             </div>
             
             <div className="feature-card">
               <Calendar className="feature-icon" size={48} />
-              <h3>Get Custom Itinerary</h3>
-              <p>Our AI agents create a personalized day-by-day plan optimized for you</p>
+              <h3>Day-by-Day Itinerary</h3>
+              <p>Receive a complete calendar with morning, afternoon, and evening plans</p>
             </div>
             
             <div className="feature-card">
               <DollarSign className="feature-icon" size={48} />
-              <h3>Budget Planning</h3>
-              <p>Receive detailed cost breakdowns and budget-friendly recommendations</p>
-            </div>
-            
-            <div className="feature-card">
-              <Sparkles className="feature-icon" size={48} />
-              <h3>Smart Optimization</h3>
-              <p>Weather-aware planning, optimized routes, and personalized suggestions</p>
+              <h3>Budget Aware</h3>
+              <p>Mention your budget and the AI tailors every recommendation to fit it</p>
             </div>
           </div>
         </div>
@@ -61,8 +59,8 @@ function HomePage() {
         <div className="container">
           <h2>Ready to explore the world?</h2>
           <p>Start planning your next adventure in minutes</p>
-          <button className="btn btn-secondary btn-large" onClick={() => navigate('/plan')}>
-            Create Your Itinerary
+          <button className="btn btn-secondary btn-large" onClick={() => navigate('/chat')}>
+            Start Chatting
           </button>
         </div>
       </section>
